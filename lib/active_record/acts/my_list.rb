@@ -92,6 +92,10 @@ module ActiveRecord
           self.send(position_column) == bottom_position_in_list
         end
 
+         # Test if this record is in a list
+        def in_list?
+          !send(position_column).nil?
+        end
 
         private
           def add_to_list_top
