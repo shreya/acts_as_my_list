@@ -27,10 +27,6 @@ module ActiveRecord
       end
 
       module InstanceMethods
-        # Insert the item at the given position (defaults to the top position of 1).
-        def insert_at(position = 1)
-          insert_at_position(position)
-        end
 
         # Swap positions with the next lower item, if one exists.
         def move_lower
@@ -40,6 +36,22 @@ module ActiveRecord
             lower_item.decrement_position
             increment_position
           end
+        end
+
+
+        def higher_item
+          return nil unless in_list?
+          acts_as_list_class.find(:first, :conditions =>
+            "#{scope_condition} AND #{position_column} = #{(send(position_column).to_i - 1).to_s}"
+          )
+        end
+
+        # Return the next lower item in the list.
+        def lower_item
+          return nil unless in_list?
+          acts_as_list_class.find(:first, :conditions =>
+            "#{scope_condition} AND #{position_column} = #{(send(position_column).to_i + 1).to_s}"
+          )
         end
 
         # Swap positions with the next higher item, if one exists.
@@ -72,29 +84,21 @@ module ActiveRecord
           end
         end
 
-        # Removes the item from the list.
-        def remove_from_list
-          if in_list?
-            decrement_positions_on_lower_items
-            update_attribute position_column, nil
-          end
-        end
-
-        # Return +true+ if this object is the first in the list.
-        def first?
-          return false unless in_list?
-          self.send(position_column) == 1
-        end
-
-        # Return +true+ if this object is the last in the list.
-        def last?
-          return false unless in_list?
-          self.send(position_column) == bottom_position_in_list
-        end
-
          # Test if this record is in a list
         def in_list?
           !send(position_column).nil?
+        end
+        
+        
+        def increment_position
+          return unless in_list? and self.send(position_column) != 1
+          update_attribute position_column, self.send(position_column).to_i + 1
+        end
+
+        # Decrease the position of this item without adjusting the rest of the list.
+        def decrement_position
+          return unless in_list?
+          update_attribute position_column, self.send(position_column).to_i - 1
         end
 
         private
@@ -178,7 +182,3 @@ module ActiveRecord
     end
   end
 end
-
-
-
-  
