@@ -10,7 +10,7 @@ module ActiveRecord
           configuration = { :column => "position", :scope => "1 = 1" }
 
           class_eval <<-EOV
-            include ActiveRecord::Acts::List::InstanceMethods
+            include ActiveRecord::Acts::MyList::InstanceMethods
 
             def acts_as_list_class
               ::#{self.name}
